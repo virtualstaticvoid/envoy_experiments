@@ -1,0 +1,58 @@
+---
+version: '2'
+
+networks:
+  envoymesh: {}
+
+services:
+
+  front-envoy:
+    build:
+      context: .
+    volumes:
+      - ./envoy.json:/etc/envoy.json
+    networks:
+      - envoymesh
+    ports:
+      - "8000:8000"  # api
+      - "8001:8001"  # admin
+
+  service1:
+    build:
+      context: httpbin
+    networks:
+      envoymesh:
+        aliases:
+          - service1
+    environment:
+      - SERVICE_NAME=1
+
+  service2:
+    build:
+      context: httpbin
+    networks:
+      envoymesh:
+        aliases:
+          - service2
+    environment:
+      - SERVICE_NAME=2
+
+  service3:
+    build:
+      context: httpbin
+    networks:
+      envoymesh:
+        aliases:
+          - service3
+    environment:
+      - SERVICE_NAME=3
+
+  service4:
+    build:
+      context: httpbin
+    networks:
+      envoymesh:
+        aliases:
+          - service4
+    environment:
+      - SERVICE_NAME=4
