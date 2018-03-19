@@ -15,6 +15,7 @@
                   "name": "backend",
                   "domains": ["*"],
                   "routes": [
+
                     {
                       "timeout_ms": 0,
                       "prefix": "/service/1",
@@ -24,6 +25,16 @@
                       "timeout_ms": 0,
                       "prefix": "/service/2",
                       "cluster": "service2"
+                    },
+                    {
+                      "timeout_ms": 0,
+                      "prefix": "/service/2/subset/3",
+                      "cluster": "service3"
+                    },
+                    {
+                      "timeout_ms": 0,
+                      "prefix": "/service/2/subset3/x/4",
+                      "cluster": "service4"
                     }
 
                   ]
@@ -53,10 +64,9 @@
         "connect_timeout_ms": 250,
         "type": "strict_dns",
         "lb_type": "round_robin",
-        "features": "http2",
         "hosts": [
           {
-            "url": "tcp://service1:3030"
+            "url": "tcp://service1:8080/"
           }
         ]
       },
@@ -65,14 +75,34 @@
         "connect_timeout_ms": 250,
         "type": "strict_dns",
         "lb_type": "round_robin",
-        "features": "http2",
         "hosts": [
           {
-            "url": "tcp://service2:3030"
+            "url": "tcp://service2:8080"
+          }
+        ]
+      },
+      {
+        "name": "service3",
+        "connect_timeout_ms": 250,
+        "type": "strict_dns",
+        "lb_type": "round_robin",
+        "hosts": [
+          {
+            "url": "tcp://service3:8080"
+          }
+        ]
+      },
+      {
+        "name": "service4",
+        "connect_timeout_ms": 250,
+        "type": "strict_dns",
+        "lb_type": "round_robin",
+        "hosts": [
+          {
+            "url": "tcp://service4:8080"
           }
         ]
       }
     ]
   }
 }
-

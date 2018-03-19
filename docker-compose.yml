@@ -10,7 +10,7 @@ services:
     build:
       context: .
     volumes:
-      - ./envoy.json:/etc/envoy.json
+      - "./envoy.json:/etc/envoy.json"
     networks:
       - envoymesh
     ports:
@@ -20,12 +20,20 @@ services:
   service1:
     build:
       context: httpbin
+    command: gunicorn -b 0.0.0.0:8080 httpbin:app --log-level DEBUG
+    volumes:
+      - "./httpbin:/httpbin"
+      - "./httpbin/httpbin:/usr/local/lib/python3.6/site-packages/httpbin"
     networks:
       envoymesh:
         aliases:
           - service1
     environment:
       - SERVICE_NAME=1
+    expose:
+      - 8080
+    ports:
+      - "9090:8080"
 
   service2:
     build:
@@ -36,6 +44,8 @@ services:
           - service2
     environment:
       - SERVICE_NAME=2
+    expose:
+      - 8080
 
   service3:
     build:
@@ -46,6 +56,8 @@ services:
           - service3
     environment:
       - SERVICE_NAME=3
+    expose:
+      - 8080
 
   service4:
     build:
@@ -56,3 +68,5 @@ services:
           - service4
     environment:
       - SERVICE_NAME=4
+    expose:
+      - 8080
