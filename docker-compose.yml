@@ -10,11 +10,11 @@ services:
     build:
       context: .
     volumes:
-      - "./envoy.json:/etc/envoy.json"
+      - "./envoy.yaml:/etc/envoy.yaml"
     networks:
       - envoymesh
     ports:
-      - "8000:8000"  # api
+      - "8000:8000"  # gateway
       - "8001:8001"  # admin
 
   service1:
@@ -29,11 +29,9 @@ services:
         aliases:
           - service1
     environment:
-      - SERVICE_NAME=1
+      SERVICE_NAME: "svc1"
     expose:
       - 8080
-    ports:
-      - "9090:8080"
 
   service2:
     build:
@@ -43,7 +41,7 @@ services:
         aliases:
           - service2
     environment:
-      - SERVICE_NAME=2
+      SERVICE_NAME: "svc2"
     expose:
       - 8080
 
@@ -55,7 +53,7 @@ services:
         aliases:
           - service3
     environment:
-      - SERVICE_NAME=3
+      SERVICE_NAME: "svc3"
     expose:
       - 8080
 
@@ -67,6 +65,6 @@ services:
         aliases:
           - service4
     environment:
-      - SERVICE_NAME=4
+      SERVICE_NAME: "svc4"
     expose:
       - 8080

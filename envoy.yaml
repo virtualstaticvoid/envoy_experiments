@@ -1,0 +1,97 @@
+admin:
+  access_log_path: /tmp/admin_access.log
+  address:
+    socket_address:
+      address: 0.0.0.0
+      port_value: 8001
+
+static_resources:
+  listeners:
+  - name: default
+    address:
+      socket_address:
+        address: 0.0.0.0
+        port_value: 8000
+    filter_chains:
+    - filters:
+      - name: envoy.http_connection_manager
+        config:
+          stat_prefix: ingress_http
+          codec_type: AUTO
+          route_config:
+            name: local_route
+            virtual_hosts:
+            - name: local_service
+              domains: ["*"]
+              routes:
+
+              # most specific at the top
+
+              - match:
+                  prefix: "/service/2/subset/3/service/4"
+                route:
+                    cluster: service4
+                    prefix_rewrite: "/"
+
+              - match:
+                  prefix: "/service/2/subset/3"
+                route:
+                    cluster: service3
+                    prefix_rewrite: "/"
+
+              - match:
+                  prefix: "/service/2"
+                route:
+                    cluster: service2
+                    prefix_rewrite: "/"
+
+              - match:
+                  prefix: "/service/1"
+                route:
+                    cluster: service1
+                    prefix_rewrite: "/"
+
+
+          http_filters:
+          - name: envoy.router
+
+  clusters:
+  - name: service1
+    connect_timeout: 0.25s
+    type: STRICT_DNS
+    lb_policy: ROUND_ROBIN
+    http_protocol_options: {}
+    hosts:
+    - socket_address:
+        address: service1
+        port_value: 8080
+
+  - name: service2
+    connect_timeout: 0.25s
+    type: STRICT_DNS
+    lb_policy: ROUND_ROBIN
+    http_protocol_options: {}
+    hosts:
+    - socket_address:
+        address: service2
+        port_value: 8080
+
+  - name: service3
+    connect_timeout: 0.25s
+    type: STRICT_DNS
+    lb_policy: ROUND_ROBIN
+    http_protocol_options: {}
+    hosts:
+    - socket_address:
+        address: service3
+        port_value: 8080
+
+  - name: service4
+    connect_timeout: 0.25s
+    type: STRICT_DNS
+    lb_policy: ROUND_ROBIN
+    http_protocol_options: {}
+    hosts:
+    - socket_address:
+        address: service4
+        port_value: 8080
