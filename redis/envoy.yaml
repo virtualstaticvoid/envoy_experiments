@@ -1,0 +1,40 @@
+# this is the service configuration
+static_resources:
+
+  # https://www.envoyproxy.io/docs/envoy/latest/api-v2/api/v2/lds.proto.html#envoy-api-msg-listener
+  listeners:
+  - address:
+      socket_address:
+        address: 0.0.0.0
+        port_value: 8080
+
+    # https://www.envoyproxy.io/docs/envoy/latest/api-v2/api/v2/listener/listener.proto.html#envoy-api-msg-listener-filterchain
+    filter_chains:
+
+    # https://www.envoyproxy.io/docs/envoy/latest/api-v2/api/v2/listener/listener.proto.html#envoy-api-msg-listener-filter
+    - filters:
+
+      # https://www.envoyproxy.io/docs/envoy/latest/api-v2/config/filter/network/tcp_proxy/v2/tcp_proxy.proto.html#envoy-api-msg-config-filter-network-tcp-proxy-v2-tcpproxy
+      - name: envoy.tcp_proxy
+        config:
+          stat_prefix: ingress_redis
+          cluster: local_service
+
+
+  # https://www.envoyproxy.io/docs/envoy/latest/api-v2/clusters/clusters
+  clusters:
+  - name: local_service
+    type: strict_dns
+    connect_timeout: 0.25s
+    lb_policy: round_robin
+    hosts:
+    - socket_address:
+        address: 127.0.0.1
+        port_value: 6379
+
+admin:
+  access_log_path: "/dev/null"
+  address:
+    socket_address:
+      address: 0.0.0.0
+      port_value: 8081

@@ -6,6 +6,9 @@ networks:
 
 services:
 
+  #
+  # entry point to _all_ services
+  #
   front-envoy:
     build:
       context: .
@@ -17,13 +20,14 @@ services:
       - "8000:8000"  # gateway
       - "8001:8001"  # admin
 
+
+  #
+  # example application services
+  #
+
   service1:
     build:
       context: httpbin
-# command: gunicorn -b 0.0.0.0:8080 httpbin:app --log-level DEBUG
-# volumes:
-#   - "./httpbin:/httpbin"
-#   - "./httpbin/httpbin:/usr/local/lib/python3.6/site-packages/httpbin"
     networks:
       envoymesh:
         aliases:
@@ -32,6 +36,8 @@ services:
       SERVICE_NAME: "svc1"
     expose:
       - 8080
+    ports:
+      - "9001:8081"  # admin
 
   service2:
     build:
@@ -44,6 +50,8 @@ services:
       SERVICE_NAME: "svc2"
     expose:
       - 8080
+    ports:
+      - "9002:8081"  # admin
 
   service3:
     build:
@@ -56,6 +64,8 @@ services:
       SERVICE_NAME: "svc3"
     expose:
       - 8080
+    ports:
+      - "9003:8081"  # admin
 
   service4:
     build:
@@ -68,3 +78,73 @@ services:
       SERVICE_NAME: "svc4"
     expose:
       - 8080
+    ports:
+      - "9004:8081"  # admin
+
+  #
+  # example base services ~ not exposed via front envoy
+  # i.e. these services are consumed by the application services
+  #
+
+  redis:
+    build:
+      context: redis
+    volumes:
+      - "redis_data:/data"
+      - "./redis/envoy.yaml:/etc/envoy.yaml"
+    networks:
+      envoymesh:
+        aliases:
+          - redis
+    environment:
+      SERVICE_NAME: "redis"
+    expose:
+      - 8080
+    ports:
+      - "9005:8080"
+      - "9006:8081"  # admin
+
+  postgres:
+    build:
+      context: postgres
+    volumes:
+      - "postgres_data:/var/lib/postgresql/data"
+      - "./postgres/envoy.yaml:/etc/envoy.yaml"
+      - "./postgres/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql"
+    networks:
+      envoymesh:
+        aliases:
+          - postgres
+    environment:
+      SERVICE_NAME: "postgres"
+    expose:
+      - 8080
+    ports:
+      - "9007:8080"
+      - "9008:8081"  # admin
+    env_file:
+      - "./postgres/.env"
+
+  rabbitmq:
+    build:
+      context: rabbitmq
+    volumes:
+      - "./rabbitmq/envoy.yaml:/etc/envoy.yaml"
+    networks:
+      envoymesh:
+        aliases:
+          - rabbitmq
+    environment:
+      SERVICE_NAME: "rabbitmq"
+    expose:
+      - 8080
+    ports:
+      - "9009:8080"
+      - "9010:8081"   # admin
+      - "9011:8082"   # rabbimq admin
+    env_file:
+      - "./rabbitmq/.env"
+
+volumes:
+  redis_data: {}
+  postgres_data: {}
