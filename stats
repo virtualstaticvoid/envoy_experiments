@@ -1,3 +1,6 @@
 #!/bin/bash
 
 curl http://localhost:8001/clusters | grep service1
+
+watch -n 1 'curl -s localhost:9010/stats | grep local_service'
+
