@@ -1,11 +1,4 @@
 # this is the gateway configuration
-admin:
-  access_log_path: /tmp/admin_access.log
-  address:
-    socket_address:
-      address: 0.0.0.0
-      port_value: 8001
-
 static_resources:
   listeners:
   - name: default
@@ -26,10 +19,22 @@ static_resources:
               domains: ["*"]
               routes:
 
-              # most specific at the top
+              #
+              # illustrates how one logical API can be serviced
+              # by multiple backend services
+              #
+              # E.g.   /            => service 1 => /
+              #        /foo         => service 2 => /get
+              #        /foo/bar     => service 3 => /
+              #        /foo/bar/baz => service 4 => / + THIS_IS:A_VALUE header
+              #
+              # each backend service is wrapped by an envoy too, so connections
+              # between the front-proxy and each backend is over HTTP2
+              #
 
+              # NB: most specific at the top
               - match:
-                  prefix: "/service/2/subset/3/service/4"
+                  prefix: "/foo/bar/baz"
                 route:
                     cluster: service4
                     prefix_rewrite: "/"
@@ -39,19 +44,19 @@ static_resources:
                         value: A_VALUE
 
               - match:
-                  prefix: "/service/2/subset/3"
+                  prefix: "/foo/bar"
                 route:
                     cluster: service3
                     prefix_rewrite: "/"
 
               - match:
-                  prefix: "/service/2"
+                  prefix: "/foo"
                 route:
                     cluster: service2
-                    prefix_rewrite: "/"
+                    prefix_rewrite: "/get"
 
               - match:
-                  prefix: "/service/1"
+                  prefix: "/"
                 route:
                     cluster: service1
                     prefix_rewrite: "/"
@@ -61,6 +66,7 @@ static_resources:
           - name: envoy.router
 
   clusters:
+
   - name: service1
     connect_timeout: 0.25s
     type: STRICT_DNS
@@ -100,3 +106,10 @@ static_resources:
     - socket_address:
         address: service4
         port_value: 8080
+
+admin:
+  access_log_path: /tmp/admin_access.log
+  address:
+    socket_address:
+      address: 0.0.0.0
+      port_value: 8001

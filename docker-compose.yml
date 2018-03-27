@@ -1,14 +1,12 @@
 ---
-version: '2'
-
-networks:
-  envoymesh: {}
+version: '3'
 
 services:
 
   #
   # entry point to _all_ services
   #
+
   front-envoy:
     build:
       context: .
@@ -144,6 +142,9 @@ services:
       - "9011:8082"   # rabbimq admin
     env_file:
       - "./rabbitmq/.env"
+
+networks:
+  envoymesh: {}
 
 volumes:
   redis_data: {}

@@ -1,5 +1,12 @@
-curl -v localhost:8000/service/2/subset/3/service/4/env
-curl -v localhost:8000/service/2/subset/3/env
-curl -v localhost:8000/service/2/env
-curl -v localhost:8000/service/1/env
 
+curl -v localhost:8000/env
+curl -v localhost:8000/env
+
+curl -v localhost:8000/foo
+curl -v localhost:8000/foo/env
+
+curl -v localhost:8000/foo/bar
+curl -v localhost:8000/foo/bar/env
+
+curl -v localhost:8000/foo/bar/baz
+curl -v localhost:8000/foo/bar/baz/env

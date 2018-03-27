@@ -6,7 +6,8 @@ FROM redis:3.2-alpine
 
 ENV LANG=C.UTF-8
 
-# here we install GNU libc (aka glibc) and set C.UTF-8 locale as default.
+# here we install GNU libc (aka glibc) and set C.UTF-8 locale as default, since envoy is dependant on it
+# see https://github.com/sgerrand/alpine-pkg-glibc for more details
 RUN ALPINE_GLIBC_BASE_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases/download" && \
     ALPINE_GLIBC_PACKAGE_VERSION="2.27-r0" && \
     ALPINE_GLIBC_BASE_PACKAGE_FILENAME="glibc-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
@@ -31,7 +32,7 @@ RUN ALPINE_GLIBC_BASE_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases
     \
     apk del glibc-i18n && \
     \
-    rm "/root/.wget-hsts" && \
+    rm "/root/.wget-hsts" || true && \
     apk del .build-dependencies && \
     rm \
         "$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" \
