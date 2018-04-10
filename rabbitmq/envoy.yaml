@@ -4,7 +4,6 @@ static_resources:
   # https://www.envoyproxy.io/docs/envoy/latest/api-v2/api/v2/lds.proto.html#envoy-api-msg-listener
   listeners:
 
-
   # rabbitmq
   - address:
       socket_address:

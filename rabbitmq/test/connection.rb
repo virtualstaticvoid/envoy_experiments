@@ -3,9 +3,9 @@ module Connection
     Bunny.new(
       :host     => 'localhost',
       :port     => 9009,
-      :vhost    => 'envoy',
-      :user     => 'envoy',
-      :password => 's3cr3t'
+      :vhost    => ENV['RABBITMQ_DEFAULT_VHOST'],
+      :user     => ENV['RABBITMQ_DEFAULT_USER'],
+      :password => ENV['RABBITMQ_DEFAULT_PASS']
     )
   end
 

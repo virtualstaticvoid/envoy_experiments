@@ -80,7 +80,7 @@ services:
       - "9004:8081"  # admin
 
   #
-  # example base services ~ not exposed via front envoy
+  # example base services ~ not exposed via front envoy, but via sidecar proxy
   # i.e. these services are consumed by the application services
   #
 
@@ -107,8 +107,8 @@ services:
       context: postgres
     volumes:
       - "postgres_data:/var/lib/postgresql/data"
-      - "./postgres/envoy.yaml:/etc/envoy.yaml"
       - "./postgres/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql"
+      - "./postgres/envoy.yaml:/etc/envoy.yaml"
     networks:
       envoymesh:
         aliases:
@@ -127,6 +127,7 @@ services:
     build:
       context: rabbitmq
     volumes:
+      - "rabbitmq_data:/var/lib/rabbitmq"
       - "./rabbitmq/envoy.yaml:/etc/envoy.yaml"
     networks:
       envoymesh:
@@ -149,3 +150,4 @@ networks:
 volumes:
   redis_data: {}
   postgres_data: {}
+  rabbitmq_data: {}

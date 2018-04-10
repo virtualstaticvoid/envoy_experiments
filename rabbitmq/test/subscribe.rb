@@ -1,7 +1,4 @@
-require 'time'
-require 'bunny'
-require_relative 'connection'
-require_relative 'wait'
+require_relative 'app'
 
 include Connection
 
