@@ -6,7 +6,6 @@ curl http://localhost:8001/clusters | grep service2
 curl http://localhost:8001/clusters | grep service3
 curl http://localhost:8001/clusters | grep service4
 
-
 # redis
 watch -n 1 'curl -s localhost:9006/stats | grep local_service'
 
@@ -15,7 +14,6 @@ watch -n 1 'curl -s localhost:9008/stats | grep local_service'
 
 # rabbitmq
 watch -n 1 'curl -s localhost:9010/stats | grep local_service'
-
 
 # rabbitmq dash
 xdg-open http://localhost:9011
