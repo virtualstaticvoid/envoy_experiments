@@ -17,7 +17,7 @@ static_resources:
       # https://www.envoyproxy.io/docs/envoy/latest/api-v2/config/filter/network/tcp_proxy/v2/tcp_proxy.proto.html#envoy-api-msg-config-filter-network-tcp-proxy-v2-tcpproxy
       - name: envoy.tcp_proxy
         config:
-          stat_prefix: ingress_redis
+          stat_prefix: ingress_postgres
           cluster: local_service
 
   # https://www.envoyproxy.io/docs/envoy/latest/api-v2/clusters/clusters
