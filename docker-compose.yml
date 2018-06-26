@@ -9,20 +9,22 @@ services:
 
   front-envoy:
     build:
-      context: .
+      context: sidecar
     volumes:
       - "./envoy.yaml:/etc/envoy.yaml"
     networks:
       - envoymesh
     ports:
-      - "8000:8000"  # gateway
-      - "8001:8001"  # admin
+      - "8000:9000"  # gateway
+      - "8001:9090"  # admin
 
 
   #
   # example application services
   #
 
+
+  # example HTTP service
   service1:
     build:
       context: httpbin
@@ -34,9 +36,23 @@ services:
       SERVICE_NAME: "svc1"
     expose:
       - 8080
-    ports:
-      - "9001:8081"  # admin
 
+  service1_sc:
+    build:
+      context: sidecar
+    networks:
+      envoymesh:
+        aliases:
+          - service1
+    links:
+      - service1
+    environment:
+      SERVICE_NAME: "svc1-sc"
+    ports:
+      - "8010:9000"  # service
+      - "8011:9090"  # admin
+
+  # example service which consumes redis
   service2:
     build:
       context: httpbin
@@ -46,11 +62,23 @@ services:
           - service2
     environment:
       SERVICE_NAME: "svc2"
-    expose:
-      - 8080
-    ports:
-      - "9002:8081"  # admin
 
+  service2_sc:
+    build:
+      context: sidecar
+    networks:
+      envoymesh:
+        aliases:
+          - service2
+    links:
+      - service2
+    environment:
+      SERVICE_NAME: "svc2-sc"
+    ports:
+      - "8020:9000"  # service
+      - "8021:9090"  # admin
+
+  # example service which consumes postgres
   service3:
     build:
       context: httpbin
@@ -60,11 +88,23 @@ services:
           - service3
     environment:
       SERVICE_NAME: "svc3"
-    expose:
-      - 8080
-    ports:
-      - "9003:8081"  # admin
 
+  service3_sc:
+    build:
+      context: sidecar
+    networks:
+      envoymesh:
+        aliases:
+          - service3
+    links:
+      - service3
+    environment:
+      SERVICE_NAME: "svc3-sc"
+    ports:
+      - "8030:9000"  # service
+      - "8031:9090"  # admin
+
+  # example service which consumes rabbitmq
   service4:
     build:
       context: httpbin
@@ -74,10 +114,21 @@ services:
           - service4
     environment:
       SERVICE_NAME: "svc4"
-    expose:
-      - 8080
+
+  service4_sc:
+    build:
+      context: sidecar
+    networks:
+      envoymesh:
+        aliases:
+          - service4
+    links:
+      - service4
+    environment:
+      SERVICE_NAME: "svc4-sc"
     ports:
-      - "9004:8081"  # admin
+      - "8040:9000"  # service
+      - "8041:9090"  # admin
 
   #
   # example base services ~ not exposed via front envoy, but via sidecar proxy
@@ -94,13 +145,20 @@ services:
       envoymesh:
         aliases:
           - redis
+
+  redis_sc:
+    build:
+      context: sidecar
+    networks:
+      envoymesh
+    links:
+      - service4
     environment:
-      SERVICE_NAME: "redis"
-    expose:
-      - 8080
+      SERVICE_NAME: "svc4-sc"
     ports:
-      - "9005:8080"
-      - "9006:8081"  # admin
+      - "8040:9000"  # service
+      - "8041:9090"  # admin
+
 
   postgres:
     build:
@@ -117,9 +175,6 @@ services:
       SERVICE_NAME: "postgres"
     expose:
       - 8080
-    ports:
-      - "9007:8080"
-      - "9008:8081"  # admin
     env_file:
       - "./postgres/.env"
 
