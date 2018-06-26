@@ -56,9 +56,20 @@ Vagrant.configure("2") do |config|
   # application services
 
   config.vm.network "forwarded_port", guest: 8050, host: 8050 # http service
+  config.vm.network "forwarded_port", guest: 8051, host: 8051 # http envoy admin
+  config.vm.network "forwarded_port", guest: 8052, host: 8052 # http service direct
+
   config.vm.network "forwarded_port", guest: 8060, host: 8060 # redis service
+  config.vm.network "forwarded_port", guest: 8061, host: 8061 # redis envoy admin
+  config.vm.network "forwarded_port", guest: 8062, host: 8062 # redis service direct
+
   config.vm.network "forwarded_port", guest: 8070, host: 8070 # postgres service
+  config.vm.network "forwarded_port", guest: 8071, host: 8071 # postgres envoy admin
+  config.vm.network "forwarded_port", guest: 8072, host: 8072 # postgres service direct
+
   config.vm.network "forwarded_port", guest: 8080, host: 8080 # rabbitmq service
+  config.vm.network "forwarded_port", guest: 8081, host: 8081 # rabbitmq envoy admin
+  config.vm.network "forwarded_port", guest: 8082, host: 8082 # rabbitmq service direct
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine and only allow access
@@ -91,6 +102,12 @@ Vagrant.configure("2") do |config|
   #   # Customize the amount of memory on the VM:
   #   vb.memory = "1024"
   # end
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.cpus = "2"
+    vb.memory = "2048"
+  end
+
   #
   # View the documentation for the provider you are using for more
   # information on available options.
@@ -124,6 +141,9 @@ Vagrant.configure("2") do |config|
 
     # verify docker works
     docker run hello-world
+
+    # tools
+    apt-get install -y redis-tools postgresql-client
 
   SHELL
 

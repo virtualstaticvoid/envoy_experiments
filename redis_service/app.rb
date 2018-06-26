@@ -1,15 +1,19 @@
-require 'dotenv'
-Dotenv.load('../.env')
-
+require "sinatra"
 require "redis"
+require "json"
 require_relative 'connection'
 
 include Connection
 
-with_connection do |connection|
+get '/' do
+  data = {}
 
-	connection.set("foo", "bar")
+  with_connection do |connection|
+    connection.set("foo", "bar")
 
-	puts connection.get("foo")
+    data[:foo] = connection.get("foo")
+  end
 
+  content_type :json
+  return data.to_json
 end

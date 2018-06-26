@@ -15,7 +15,7 @@ static_resources:
           route_config:
             name: local_route
             virtual_hosts:
-            - name: local_service
+            - name: service
               domains: ["*"]
               routes:
 
@@ -37,11 +37,12 @@ static_resources:
               #
 
               # NB: most specific at the top
+
               - match:
                   prefix: "/foo/bar/baz"
                 route:
                     cluster: http_service
-                    prefix_rewrite: "/"
+                    prefix_rewrite: "/get"
                     request_headers_to_add:
                     - header:
                         key: THIS_IS
@@ -51,7 +52,7 @@ static_resources:
                   prefix: "/foo/bar"
                 route:
                     cluster: http_service
-                    prefix_rewrite: "/"
+                    prefix_rewrite: "/get"
 
               - match:
                   prefix: "/foo"
@@ -60,15 +61,9 @@ static_resources:
                     prefix_rewrite: "/get"
 
               - match:
-                  prefix: "/rabbitmq/subscribe"
+                  prefix: "/rabbitmq"
                 route:
-                    cluster: rabbitmq
-                    prefix_rewrite: "/"
-
-              - match:
-                  prefix: "/rabbitmq/publish"
-                route:
-                    cluster: rabbitmq
+                    cluster: rabbitmq_service
                     prefix_rewrite: "/"
 
               - match:
@@ -88,8 +83,6 @@ static_resources:
                 route:
                     cluster: http_service
                     prefix_rewrite: "/"
-
-
           http_filters:
           - name: envoy.router
 
@@ -99,7 +92,6 @@ static_resources:
     connect_timeout: 0.25s
     type: STRICT_DNS
     lb_policy: ROUND_ROBIN
-    http2_protocol_options: {}
     hosts:
     - socket_address:
         address: http_service_sc
@@ -109,7 +101,6 @@ static_resources:
     connect_timeout: 0.25s
     type: STRICT_DNS
     lb_policy: ROUND_ROBIN
-    http2_protocol_options: {}
     hosts:
     - socket_address:
         address: redis_service_sc
@@ -119,7 +110,6 @@ static_resources:
     connect_timeout: 0.25s
     type: STRICT_DNS
     lb_policy: ROUND_ROBIN
-    http2_protocol_options: {}
     hosts:
     - socket_address:
         address: postgres_service_sc
@@ -129,7 +119,6 @@ static_resources:
     connect_timeout: 0.25s
     type: STRICT_DNS
     lb_policy: ROUND_ROBIN
-    http2_protocol_options: {}
     hosts:
     - socket_address:
         address: rabbitmq_service_sc

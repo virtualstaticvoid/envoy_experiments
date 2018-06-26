@@ -24,6 +24,17 @@ static_resources:
           http_filters:
           - name: envoy.router
 
+  - address:
+      socket_address:
+        address: 0.0.0.0
+        port_value: 5672
+    filter_chains:
+    - filters:
+      - name: envoy.tcp_proxy
+        config:
+          stat_prefix: egress_rabbitmq
+          cluster: rabbitmq
+
   clusters:
   - name: service
     connect_timeout: 0.25s
@@ -31,8 +42,17 @@ static_resources:
     lb_policy: round_robin
     hosts:
     - socket_address:
-        address: http_service
+        address: rabbitmq_service
         port_value: 8080
+
+  - name: rabbitmq
+    connect_timeout: 0.25s
+    type: strict_dns
+    lb_policy: round_robin
+    hosts:
+    - socket_address:
+        address: rabbitmq_sc
+        port_value: 9080
 
 admin:
   access_log_path: "/dev/null"

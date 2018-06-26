@@ -1,23 +1,29 @@
-require 'dotenv'
-Dotenv.load('../.env')
-
+require "sinatra"
 require "pg"
+require "json"
 require_relative 'connection'
 
 include Connection
 
 SQL = <<-SQL
-  SELECT datname
-  FROM pg_catalog.pg_database
-  ORDER BY datname;
+  SELECT *
+  FROM public.example
+  ORDER BY name;
 SQL
 
-with_connection do |connection|
+get '/' do
+  data = {}
 
-  result = connection.exec(SQL)
-
-  result.each_row do |row|
-    puts row
+  with_connection do |connection|
+    result = connection.exec(SQL)
+    result.each_row do |row|
+      data[row[0]] = {
+        :name => row[1],
+        :description => row[2]
+      }
+    end
   end
 
+  content_type :json
+  return data.to_json
 end

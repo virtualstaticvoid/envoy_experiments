@@ -18,11 +18,11 @@ static_resources:
       - name: envoy.tcp_proxy
         config:
           stat_prefix: ingress_rabbitmq
-          cluster: local_service
+          cluster: service
 
   # https://www.envoyproxy.io/docs/envoy/latest/api-v2/clusters/clusters
   clusters:
-  - name: local_service
+  - name: service
     type: strict_dns
     connect_timeout: 0.25s
     lb_policy: round_robin

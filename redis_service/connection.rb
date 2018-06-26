@@ -1,9 +1,9 @@
 module Connection
   def connection
     Redis.new(
-      :host     => 'localhost',
-      :port     => 9005,
-      :db       => 0
+      :host => 'redis_service_sc',  # connect via sidecar
+      :port => 6379,
+      :db   => 0
     )
   end
 
