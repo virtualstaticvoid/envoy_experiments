@@ -7,7 +7,7 @@ import contextlib
 import six
 import json
 from werkzeug.http import parse_dict_header
-from hashlib import md5, sha256, sha512
+from hashlib import md5, sha256
 from six import BytesIO
 
 import httpbin
@@ -41,8 +41,6 @@ def _hash(data, algorithm):
     """Encode binary data according to specified algorithm, use MD5 by default"""
     if algorithm == 'SHA-256':
         return sha256(data).hexdigest()
-    elif algorithm == 'SHA-512':
-        return sha512(data).hexdigest()
     else:
         return md5(data).hexdigest()
 
@@ -67,7 +65,7 @@ def _make_digest_auth_header(username, password, method, uri, nonce,
     assert nonce
     assert method
     assert uri
-    assert algorithm in ('MD5', 'SHA-256', 'SHA-512', None)
+    assert algorithm in ('MD5', 'SHA-256', None)
 
     a1 = ':'.join([username, realm or '', password])
     ha1 = _hash(a1.encode('utf-8'), algorithm)
@@ -144,6 +142,7 @@ class HttpbinTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['args'], {})
         self.assertEqual(data['headers']['Host'], 'localhost')
+        self.assertEqual(data['headers']['Content-Type'], '')
         self.assertEqual(data['headers']['Content-Length'], '0')
         self.assertEqual(data['headers']['User-Agent'], 'test')
         # self.assertEqual(data['origin'], None)
@@ -158,6 +157,7 @@ class HttpbinTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(data['args'], {})
         self.assertEqual(data['headers']['Host'], 'localhost')
+        self.assertEqual(data['headers']['Content-Type'], '')
         self.assertEqual(data['headers']['Content-Length'], '0')
         self.assertEqual(data['url'], 'http://localhost/anything/foo/bar')
         self.assertEqual(data['method'], 'GET')
@@ -203,25 +203,6 @@ class HttpbinTestCase(unittest.TestCase):
             data=data,
         )
         self.assertEqual(response.status_code, 200)
-
-    """
-    This is currently a sort of negative-test.
-    We validate that when running Flask-only server that
-    Transfer-Encoding: chunked requests are unsupported and
-    we return 501 Not Implemented
-    """
-    def test_post_chunked(self):
-        data = '{"animal":"dog"}'
-        response = self.app.post(
-            '/post',
-            content_type='application/json',
-            headers=[('Transfer-Encoding', 'chunked')],
-            data=data,
-        )
-        self.assertEqual(response.status_code, 501)
-        #self.assertEqual(response.status_code, 200)
-        #self.assertEqual(json.loads(response.data.decode('utf-8'))['data'], '{"animal":"dog"}')
-        #self.assertEqual(json.loads(response.data.decode('utf-8'))['json'], {"animal": "dog"})
 
     def test_set_cors_headers_after_request(self):
         response = self.app.get('/get')
@@ -301,24 +282,10 @@ class HttpbinTestCase(unittest.TestCase):
         username = 'user'
         password = 'passwd'
         for qop in None, 'auth', 'auth-int',:
-            for algorithm in None, 'MD5', 'SHA-256', 'SHA-512':
+            for algorithm in None, 'MD5', 'SHA-256':
                 for body in None, b'', b'request payload':
                     for stale_after in (None, 1, 4) if algorithm else (None,) :
                         self._test_digest_auth(username, password, qop, algorithm, body, stale_after)
-
-    def test_digest_auth_with_wrong_authorization_type(self):
-        """Sending an non-digest Authorization header to /digest-auth should return a 401"""
-        auth_headers = (
-            ('Authorization', 'Basic 1234abcd'),
-            ('Authorization', ''),
-            ('',  '')
-        )
-        for header in auth_headers:
-            response = self.app.get(
-                '/digest-auth/auth/myname/mysecret',
-                headers={header[0]: header[1]}
-            )
-            self.assertEqual(response.status_code, 401)
 
     def _test_digest_auth(self, username, password, qop, algorithm=None, body=None, stale_after=None):
         uri = self._digest_auth_create_uri(username, password, qop, algorithm, stale_after)
@@ -404,7 +371,7 @@ class HttpbinTestCase(unittest.TestCase):
         username = 'user'
         password = 'passwd'
         for qop in None, 'auth', 'auth-int',:
-            for algorithm in None, 'MD5', 'SHA-256', 'SHA-512':
+            for algorithm in None, 'MD5', 'SHA-256':
                 for body in None, b'', b'request payload':
                     self._test_digest_auth_wrong_pass(username, password, qop, algorithm, body, 3)
 
@@ -666,13 +633,25 @@ class HttpbinTestCase(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 416)
 
+    def test_tracking_disabled(self):
+        with _setenv('HTTPBIN_TRACKING', None):
+            response = self.app.get('/')
+        data = response.data.decode('utf-8')
+        self.assertNotIn('google-analytics', data)
+        self.assertNotIn('perfectaudience', data)
+
+    def test_tracking_enabled(self):
+        with _setenv('HTTPBIN_TRACKING', '1'):
+            response = self.app.get('/')
+        data = response.data.decode('utf-8')
+        self.assertIn('perfectaudience', data)
+
     def test_etag_if_none_match_matches(self):
         response = self.app.get(
             '/etag/abc',
             headers={ 'If-None-Match': 'abc' }
         )
         self.assertEqual(response.status_code, 304)
-        self.assertEqual(response.headers.get('ETag'), 'abc')
 
     def test_etag_if_none_match_matches_list(self):
         response = self.app.get(
@@ -680,7 +659,6 @@ class HttpbinTestCase(unittest.TestCase):
             headers={ 'If-None-Match': '"123", "abc"' }
         )
         self.assertEqual(response.status_code, 304)
-        self.assertEqual(response.headers.get('ETag'), 'abc')
 
     def test_etag_if_none_match_matches_star(self):
         response = self.app.get(
@@ -688,7 +666,6 @@ class HttpbinTestCase(unittest.TestCase):
             headers={ 'If-None-Match': '*' }
         )
         self.assertEqual(response.status_code, 304)
-        self.assertEqual(response.headers.get('ETag'), 'abc')
 
     def test_etag_if_none_match_w_prefix(self):
         response = self.app.get(
@@ -696,7 +673,6 @@ class HttpbinTestCase(unittest.TestCase):
             headers={ 'If-None-Match': 'W/"xyzzy", W/"r2d2xxxx", W/"c3piozzzz"' }
         )
         self.assertEqual(response.status_code, 304)
-        self.assertEqual(response.headers.get('ETag'), 'c3piozzzz')
 
     def test_etag_if_none_match_has_no_match(self):
         response = self.app.get(
@@ -704,7 +680,6 @@ class HttpbinTestCase(unittest.TestCase):
             headers={ 'If-None-Match': '123' }
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.headers.get('ETag'), 'abc')
 
     def test_etag_if_match_matches(self):
         response = self.app.get(
@@ -712,7 +687,6 @@ class HttpbinTestCase(unittest.TestCase):
             headers={ 'If-Match': 'abc' }
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.headers.get('ETag'), 'abc')
 
     def test_etag_if_match_matches_list(self):
         response = self.app.get(
@@ -720,7 +694,6 @@ class HttpbinTestCase(unittest.TestCase):
             headers={ 'If-Match': '"123", "abc"' }
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.headers.get('ETag'), 'abc')
 
     def test_etag_if_match_matches_star(self):
         response = self.app.get(
@@ -728,7 +701,6 @@ class HttpbinTestCase(unittest.TestCase):
             headers={ 'If-Match': '*' }
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.headers.get('ETag'), 'abc')
 
     def test_etag_if_match_has_no_match(self):
         response = self.app.get(
@@ -736,7 +708,6 @@ class HttpbinTestCase(unittest.TestCase):
             headers={ 'If-Match': '123' }
         )
         self.assertEqual(response.status_code, 412)
-        self.assertNotIn('ETag', response.headers)
 
     def test_etag_with_no_headers(self):
         response = self.app.get(

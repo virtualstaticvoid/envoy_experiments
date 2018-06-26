@@ -12,7 +12,7 @@ import base64
 import re
 import time
 import os
-from hashlib import md5, sha256, sha512
+from hashlib import md5, sha256
 from werkzeug.http import parse_authorization_header
 from werkzeug.datastructures import WWWAuthenticate
 
@@ -270,8 +270,6 @@ def check_basic_auth(user, passwd):
 def H(data, algorithm):
     if algorithm == 'SHA-256':
         return sha256(data).hexdigest()
-    elif algorithm == 'SHA-512':
-        return sha512(data).hexdigest()
     else:
         return md5(data).hexdigest()
 
@@ -288,7 +286,7 @@ def HA1(realm, username, password, algorithm):
                            password.encode('utf-8')]), algorithm)
 
 
-def HA2(credentials, request, algorithm):
+def HA2(credentails, request, algorithm):
     """Create HA2 md5 hash
 
     If the qop directive's value is "auth" or is unspecified, then HA2:
@@ -296,9 +294,9 @@ def HA2(credentials, request, algorithm):
     If the qop directive's value is "auth-int" , then HA2 is
         HA2 = md5(A2) = MD5(method:digestURI:MD5(entityBody))
     """
-    if credentials.get("qop") == "auth" or credentials.get('qop') is None:
+    if credentails.get("qop") == "auth" or credentails.get('qop') is None:
         return H(b":".join([request['method'].encode('utf-8'), request['uri'].encode('utf-8')]), algorithm)
-    elif credentials.get("qop") == "auth-int":
+    elif credentails.get("qop") == "auth-int":
         for k in 'method', 'uri', 'body':
             if k not in request:
                 raise ValueError("%s required" % k)
@@ -309,7 +307,7 @@ def HA2(credentials, request, algorithm):
     raise ValueError
 
 
-def response(credentials, password, request):
+def response(credentails, password, request):
     """Compile digest auth response
 
     If the qop directive's value is "auth" or "auth-int" , then compute the response as follows:
@@ -318,34 +316,34 @@ def response(credentials, password, request):
        RESPONSE = MD5(HA1:nonce:HA2)
 
     Arguments:
-    - `credentials`: credentials dict
+    - `credentails`: credentails dict
     - `password`: request user password
     - `request`: request dict
     """
     response = None
-    algorithm = credentials.get('algorithm')
+    algorithm = credentails.get('algorithm')
     HA1_value = HA1(
-        credentials.get('realm'),
-        credentials.get('username'),
+        credentails.get('realm'),
+        credentails.get('username'),
         password,
         algorithm
     )
-    HA2_value = HA2(credentials, request, algorithm)
-    if credentials.get('qop') is None:
+    HA2_value = HA2(credentails, request, algorithm)
+    if credentails.get('qop') is None:
         response = H(b":".join([
             HA1_value.encode('utf-8'),
-            credentials.get('nonce', '').encode('utf-8'),
+            credentails.get('nonce', '').encode('utf-8'),
             HA2_value.encode('utf-8')
         ]), algorithm)
-    elif credentials.get('qop') == 'auth' or credentials.get('qop') == 'auth-int':
+    elif credentails.get('qop') == 'auth' or credentails.get('qop') == 'auth-int':
         for k in 'nonce', 'nc', 'cnonce', 'qop':
-            if k not in credentials:
+            if k not in credentails:
                 raise ValueError("%s required for response H" % k)
         response = H(b":".join([HA1_value.encode('utf-8'),
-                               credentials.get('nonce').encode('utf-8'),
-                               credentials.get('nc').encode('utf-8'),
-                               credentials.get('cnonce').encode('utf-8'),
-                               credentials.get('qop').encode('utf-8'),
+                               credentails.get('nonce').encode('utf-8'),
+                               credentails.get('nc').encode('utf-8'),
+                               credentails.get('cnonce').encode('utf-8'),
+                               credentails.get('qop').encode('utf-8'),
                                HA2_value.encode('utf-8')]), algorithm)
     else:
         raise ValueError("qop value are wrong")
@@ -357,16 +355,13 @@ def check_digest_auth(user, passwd):
     """Check user authentication using HTTP Digest auth"""
 
     if request.headers.get('Authorization'):
-        credentials = parse_authorization_header(request.headers.get('Authorization'))
-        if not credentials:
+        credentails = parse_authorization_header(request.headers.get('Authorization'))
+        if not credentails:
             return
-        request_uri = request.script_root + request.path
-        if request.query_string:
-            request_uri +=  '?' + request.query_string
-        response_hash = response(credentials, passwd, dict(uri=request_uri,
+        response_hash = response(credentails, passwd, dict(uri=request.script_root + request.path,
                                                            body=request.data,
                                                            method=request.method))
-        if credentials.get('response') == response_hash:
+        if credentails.get('response') == response_hash:
             return True
     return False
 
@@ -464,8 +459,8 @@ def digest_challenge_response(app, qop, algorithm, stale = False):
         str(time.time()).encode('ascii'),
         b':',
         os.urandom(10)
-    ]), algorithm)
-    opaque = H(os.urandom(10), algorithm)
+    ]), "MD5")
+    opaque = H(os.urandom(10), "MD5")
 
     auth = WWWAuthenticate("digest")
     auth.set_digest('me@kennethreitz.com', nonce, opaque=opaque,

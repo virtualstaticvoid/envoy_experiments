@@ -7,12 +7,12 @@ import io
 
 setup(
     name="httpbin",
-    version="0.9.0",
+    version="0.6.1",
     description="HTTP Request and Response Service",
     # long_description=long_description,
 
     # The project URL.
-    url='https://github.com/requests/httpbin',
+    url='https://github.com/kennethreitz/httpbin',
 
     # Author details
     author='Kenneth Reitz',
@@ -28,13 +28,12 @@ setup(
          'License :: OSI Approved :: MIT License',
          'Programming Language :: Python',
          'Programming Language :: Python :: 2.7',
-         'Programming Language :: Python :: 3.6',
+         'Programming Language :: Python :: 3.4',
     ],
-    test_suite="test_httpbin",
     packages=find_packages(),
     include_package_data = True, # include files listed in MANIFEST.in
     install_requires=[
         'Flask', 'MarkupSafe', 'decorator', 'itsdangerous', 'six', 'brotlipy',
-        'raven[flask]', 'werkzeug>=0.14.1', 'gevent', 'flasgger'
+        'raven[flask]', 'flask_limiter', 'Flask-Common'
     ],
 )
