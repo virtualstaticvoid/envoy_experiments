@@ -4,10 +4,10 @@ version: '3'
 services:
 
   #
-  # entry point to _all_ services
+  # entry point to "public" services or APIs
   #
 
-  front-envoy:
+  gateway:
     build:
       context: sidecar
     volumes:
@@ -15,150 +15,58 @@ services:
     networks:
       - envoymesh
     ports:
-      - "8000:9000"  # gateway
-      - "8001:9090"  # admin
+      - "8000:9080"  # gateway
+      - "8001:9090"  # envoy admin
 
 
   #
-  # example application services
-  #
-
-
-  # example HTTP service
-  service1:
-    build:
-      context: httpbin
-    networks:
-      envoymesh:
-        aliases:
-          - service1
-    environment:
-      SERVICE_NAME: "svc1"
-    expose:
-      - 8080
-
-  service1_sc:
-    build:
-      context: sidecar
-    networks:
-      envoymesh:
-        aliases:
-          - service1
-    links:
-      - service1
-    environment:
-      SERVICE_NAME: "svc1-sc"
-    ports:
-      - "8010:9000"  # service
-      - "8011:9090"  # admin
-
-  # example service which consumes redis
-  service2:
-    build:
-      context: httpbin
-    networks:
-      envoymesh:
-        aliases:
-          - service2
-    environment:
-      SERVICE_NAME: "svc2"
-
-  service2_sc:
-    build:
-      context: sidecar
-    networks:
-      envoymesh:
-        aliases:
-          - service2
-    links:
-      - service2
-    environment:
-      SERVICE_NAME: "svc2-sc"
-    ports:
-      - "8020:9000"  # service
-      - "8021:9090"  # admin
-
-  # example service which consumes postgres
-  service3:
-    build:
-      context: httpbin
-    networks:
-      envoymesh:
-        aliases:
-          - service3
-    environment:
-      SERVICE_NAME: "svc3"
-
-  service3_sc:
-    build:
-      context: sidecar
-    networks:
-      envoymesh:
-        aliases:
-          - service3
-    links:
-      - service3
-    environment:
-      SERVICE_NAME: "svc3-sc"
-    ports:
-      - "8030:9000"  # service
-      - "8031:9090"  # admin
-
-  # example service which consumes rabbitmq
-  service4:
-    build:
-      context: httpbin
-    networks:
-      envoymesh:
-        aliases:
-          - service4
-    environment:
-      SERVICE_NAME: "svc4"
-
-  service4_sc:
-    build:
-      context: sidecar
-    networks:
-      envoymesh:
-        aliases:
-          - service4
-    links:
-      - service4
-    environment:
-      SERVICE_NAME: "svc4-sc"
-    ports:
-      - "8040:9000"  # service
-      - "8041:9090"  # admin
-
-  #
-  # example base services ~ not exposed via front envoy, but via sidecar proxy
+  # base services ~ not exposed via front envoy, but via sidecar proxy
   # i.e. these services are consumed by the application services
   #
+
+  redis_sc:
+    build:
+      context: sidecar
+    volumes:
+      - "./redis/envoy.yaml:/etc/envoy.yaml"
+    networks:
+      envoymesh:
+        aliases:
+          - redis_sc
+    links:
+      - redis
+    ports:
+      - "8010:9080"  # service
+      - "8011:9090"  # envoy admin
 
   redis:
     build:
       context: redis
     volumes:
       - "redis_data:/data"
-      - "./redis/envoy.yaml:/etc/envoy.yaml"
     networks:
       envoymesh:
         aliases:
           - redis
+    ports:
+      - "8012:6379"  # service
+    env_file:
+      - "./.env"
 
-  redis_sc:
+  postgres_sc:
     build:
       context: sidecar
+    volumes:
+      - "./postgres/envoy.yaml:/etc/envoy.yaml"
     networks:
-      envoymesh
+      envoymesh:
+        aliases:
+          - postgres_sc
     links:
-      - service4
-    environment:
-      SERVICE_NAME: "svc4-sc"
+      - postgres
     ports:
-      - "8040:9000"  # service
-      - "8041:9090"  # admin
-
+      - "8020:9080"  # service
+      - "8021:9090"  # envoy admin
 
   postgres:
     build:
@@ -166,38 +74,82 @@ services:
     volumes:
       - "postgres_data:/var/lib/postgresql/data"
       - "./postgres/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql"
-      - "./postgres/envoy.yaml:/etc/envoy.yaml"
     networks:
       envoymesh:
         aliases:
           - postgres
-    environment:
-      SERVICE_NAME: "postgres"
-    expose:
-      - 8080
+    ports:
+      - "8022:5432"  # service
     env_file:
-      - "./postgres/.env"
+      - "./.env"
+
+  rabbitmq_sc:
+    build:
+      context: sidecar
+    volumes:
+      - "./rabbitmq/envoy.yaml:/etc/envoy.yaml"
+    networks:
+      envoymesh:
+        aliases:
+          - rabbitmq_sc
+    links:
+      - rabbitmq
+    ports:
+      - "8030:9080"  # service
+      - "8031:9090"  # envoy admin
 
   rabbitmq:
     build:
       context: rabbitmq
     volumes:
       - "rabbitmq_data:/var/lib/rabbitmq"
-      - "./rabbitmq/envoy.yaml:/etc/envoy.yaml"
     networks:
       envoymesh:
         aliases:
           - rabbitmq
-    environment:
-      SERVICE_NAME: "rabbitmq"
-    expose:
-      - 8080
     ports:
-      - "9009:8080"
-      - "9010:8081"   # admin
-      - "9011:8082"   # rabbimq admin
+      - "8032:5672"   # service  4369 5671 5672 25672
+      - "8033:15671"  # rabbimq admin    15671 15672
     env_file:
-      - "./rabbitmq/.env"
+      - "./.env"
+
+
+  #
+  # example services
+  #
+
+  # HTTP service (backed by httpbin)
+
+  http_service_sc:
+    build:
+      context: sidecar
+    volumes:
+      - "./http_service/envoy.yaml:/etc/envoy.yaml"
+    networks:
+      envoymesh:
+        aliases:
+          - http_service_sc
+    links:
+      - http_service
+    ports:
+      - "8010:9080"  # service
+      - "8011:9090"  # envoy admin
+
+  http_service:
+    build:
+      context: http_service
+    networks:
+      envoymesh:
+        aliases:
+          - http_service
+    ports:
+      - "8050:8080"  # direct connection for debugging
+    env_file:
+      - "./.env"
+
+  # TODO
+
+
 
 networks:
   envoymesh: {}

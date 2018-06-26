@@ -5,7 +5,7 @@ static_resources:
     address:
       socket_address:
         address: 0.0.0.0
-        port_value: 9000
+        port_value: 9080
     filter_chains:
     - filters:
       - name: envoy.http_connection_manager
@@ -23,20 +23,24 @@ static_resources:
               # illustrates how one logical API can be serviced
               # by multiple backend services
               #
-              # E.g.   /            => service 1 => /
-              #        /foo         => service 2 => /get
-              #        /foo/bar     => service 3 => /
-              #        /foo/bar/baz => service 4 => / + THIS_IS:A_VALUE header
+              # E.g.   /                   => http service     => /
+              #        /foo                => http service     => /get
+              #        /foo/bar            => http service     => /
+              #        /foo/bar/baz        => http service     => / + THIS_IS:A_VALUE header
+              #        /redis              => redis_service    => /
+              #        /postgres           => postgres_service => /
+              #        /rabbitmq/publish   => rabbitmq_service => /publish
+              #        /rabbitmq/subscribe => rabbitmq_service => /subscribe
               #
-              # each backend service is wrapped by an envoy too, so connections
-              # between the front-proxy and each backend is over HTTP2
+              # each backend service is wrapped by an envoy, so connections
+              # between the front-proxy and each backend are over HTTP2
               #
 
               # NB: most specific at the top
               - match:
                   prefix: "/foo/bar/baz"
                 route:
-                    cluster: service4
+                    cluster: http_service
                     prefix_rewrite: "/"
                     request_headers_to_add:
                     - header:
@@ -46,19 +50,43 @@ static_resources:
               - match:
                   prefix: "/foo/bar"
                 route:
-                    cluster: service3
+                    cluster: http_service
                     prefix_rewrite: "/"
 
               - match:
                   prefix: "/foo"
                 route:
-                    cluster: service2
+                    cluster: http_service
                     prefix_rewrite: "/get"
+
+              - match:
+                  prefix: "/rabbitmq/subscribe"
+                route:
+                    cluster: rabbitmq
+                    prefix_rewrite: "/"
+
+              - match:
+                  prefix: "/rabbitmq/publish"
+                route:
+                    cluster: rabbitmq
+                    prefix_rewrite: "/"
+
+              - match:
+                  prefix: "/postgres"
+                route:
+                    cluster: postgres_service
+                    prefix_rewrite: "/"
+
+              - match:
+                  prefix: "/redis"
+                route:
+                    cluster: redis_service
+                    prefix_rewrite: "/"
 
               - match:
                   prefix: "/"
                 route:
-                    cluster: service1
+                    cluster: http_service
                     prefix_rewrite: "/"
 
 
@@ -67,45 +95,45 @@ static_resources:
 
   clusters:
 
-  - name: service1
+  - name: http_service
     connect_timeout: 0.25s
     type: STRICT_DNS
     lb_policy: ROUND_ROBIN
     http2_protocol_options: {}
     hosts:
     - socket_address:
-        address: service1_sc
-        port_value: 9000
+        address: http_service_sc
+        port_value: 9080
 
-  - name: service2
+  - name: redis_service
     connect_timeout: 0.25s
     type: STRICT_DNS
     lb_policy: ROUND_ROBIN
     http2_protocol_options: {}
     hosts:
     - socket_address:
-        address: service2_sc
-        port_value: 9000
+        address: redis_service_sc
+        port_value: 9080
 
-  - name: service3
+  - name: postgres_service
     connect_timeout: 0.25s
     type: STRICT_DNS
     lb_policy: ROUND_ROBIN
     http2_protocol_options: {}
     hosts:
     - socket_address:
-        address: service3_sc
-        port_value: 9000
+        address: postgres_service_sc
+        port_value: 9080
 
-  - name: service4
+  - name: rabbitmq_service
     connect_timeout: 0.25s
     type: STRICT_DNS
     lb_policy: ROUND_ROBIN
     http2_protocol_options: {}
     hosts:
     - socket_address:
-        address: service4_sc
-        port_value: 9000
+        address: rabbitmq_service_sc
+        port_value: 9080
 
 admin:
   access_log_path: /tmp/admin_access.log

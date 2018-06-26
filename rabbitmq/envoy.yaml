@@ -3,12 +3,10 @@ static_resources:
 
   # https://www.envoyproxy.io/docs/envoy/latest/api-v2/api/v2/lds.proto.html#envoy-api-msg-listener
   listeners:
-
-  # rabbitmq
   - address:
       socket_address:
         address: 0.0.0.0
-        port_value: 8080
+        port_value: 9080
 
     # https://www.envoyproxy.io/docs/envoy/latest/api-v2/api/v2/listener/listener.proto.html#envoy-api-msg-listener-filterchain
     filter_chains:
@@ -19,64 +17,23 @@ static_resources:
       # https://www.envoyproxy.io/docs/envoy/latest/api-v2/config/filter/network/tcp_proxy/v2/tcp_proxy.proto.html#envoy-api-msg-config-filter-network-tcp-proxy-v2-tcpproxy
       - name: envoy.tcp_proxy
         config:
-          stat_prefix: ingress_redis
+          stat_prefix: ingress_rabbitmq
           cluster: local_service
-
-  # rabbitmq management
-  - address:
-      socket_address:
-        address: 0.0.0.0
-        port_value: 8082
-
-    # https://www.envoyproxy.io/docs/envoy/latest/api-v2/api/v2/listener/listener.proto.html#envoy-api-msg-listener-filterchain
-    filter_chains:
-
-    # https://www.envoyproxy.io/docs/envoy/latest/api-v2/api/v2/listener/listener.proto.html#envoy-api-msg-listener-filter
-    - filters:
-
-      - name: envoy.http_connection_manager
-        config:
-          codec_type: auto
-          stat_prefix: ingress_http
-          route_config:
-            name: local_route
-            virtual_hosts:
-            - name: service
-              domains:
-              - "*"
-              routes:
-              - match:
-                  prefix: "/"
-                route:
-                  cluster: local_management
-          http_filters:
-          - name: envoy.router
-            config: {}
 
   # https://www.envoyproxy.io/docs/envoy/latest/api-v2/clusters/clusters
   clusters:
-
   - name: local_service
     type: strict_dns
     connect_timeout: 0.25s
     lb_policy: round_robin
     hosts:
     - socket_address:
-        address: 127.0.0.1
+        address: rabbitmq
         port_value: 5672
-
-  - name: local_management
-    type: strict_dns
-    connect_timeout: 0.25s
-    lb_policy: round_robin
-    hosts:
-    - socket_address:
-        address: 127.0.0.1
-        port_value: 15672
 
 admin:
   access_log_path: "/dev/null"
   address:
     socket_address:
       address: 0.0.0.0
-      port_value: 8081
+      port_value: 9090

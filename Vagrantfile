@@ -32,23 +32,33 @@ Vagrant.configure("2") do |config|
   # NOTE: This will enable public access to the opened port
   # config.vm.network "forwarded_port", guest: 80, host: 8080
 
+  # gateway
+
   config.vm.network "forwarded_port", guest: 8000, host: 8000 # gateway
   config.vm.network "forwarded_port", guest: 8001, host: 8001 # gateway envoy admin
 
-  config.vm.network "forwarded_port", guest: 9001, host: 9001 # service 1 envoy admin
-  config.vm.network "forwarded_port", guest: 9002, host: 9002 # service 2 envoy admin
-  config.vm.network "forwarded_port", guest: 9003, host: 9003 # service 3 envoy admin
-  config.vm.network "forwarded_port", guest: 9004, host: 9004 # service 4 envoy admin
+  # base services
 
-  config.vm.network "forwarded_port", guest: 9005, host: 9005 # redis
-  config.vm.network "forwarded_port", guest: 9006, host: 9006 # redis envoy admin
+  config.vm.network "forwarded_port", guest: 8010, host: 8010 # redis
+  config.vm.network "forwarded_port", guest: 8011, host: 8011 # redis envoy admin
+  config.vm.network "forwarded_port", guest: 8012, host: 8012 # redis direct
 
-  config.vm.network "forwarded_port", guest: 9007, host: 9007 # postgres
-  config.vm.network "forwarded_port", guest: 9008, host: 9008 # postgres envoy admin
+  config.vm.network "forwarded_port", guest: 8020, host: 8020 # postgres
+  config.vm.network "forwarded_port", guest: 8021, host: 8021 # postgres envoy admin
+  config.vm.network "forwarded_port", guest: 8022, host: 8022 # postgres direct
 
-  config.vm.network "forwarded_port", guest: 9009, host: 9009 # rabbitmq
-  config.vm.network "forwarded_port", guest: 9010, host: 9010 # rabbitmq envoy admin
-  config.vm.network "forwarded_port", guest: 9011, host: 9011 # rabbitmq admin
+  config.vm.network "forwarded_port", guest: 8030, host: 8030 # rabbitmq
+  config.vm.network "forwarded_port", guest: 8031, host: 8031 # rabbitmq envoy admin
+  config.vm.network "forwarded_port", guest: 8032, host: 8032 # rabbitmq direct
+  config.vm.network "forwarded_port", guest: 8033, host: 8033 # rabbitmq admin
+
+
+  # application services
+
+  config.vm.network "forwarded_port", guest: 8050, host: 8050 # http service
+  config.vm.network "forwarded_port", guest: 8060, host: 8060 # redis service
+  config.vm.network "forwarded_port", guest: 8070, host: 8070 # postgres service
+  config.vm.network "forwarded_port", guest: 8080, host: 8080 # rabbitmq service
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine and only allow access
@@ -93,7 +103,7 @@ Vagrant.configure("2") do |config|
     ##
     # pre-requisites
     apt-get update
-    apt-get install -y curl software-properties-common apt-transport-https
+    apt-get install -y curl software-properties-common apt-transport-https byobu
 
     ##
     # setup software source for apt
@@ -130,12 +140,13 @@ Vagrant.configure("2") do |config|
 
   config.vm.provision "shell", privileged: true, inline: <<-SHELL
 
-    # build codes
     cd /vagrant
-    docker-compose build
 
     # pull all images
     docker-compose pull
+
+    # build images
+    docker-compose build
 
   SHELL
 

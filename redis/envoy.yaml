@@ -6,7 +6,7 @@ static_resources:
   - address:
       socket_address:
         address: 0.0.0.0
-        port_value: 8080
+        port_value: 9080
 
     # https://www.envoyproxy.io/docs/envoy/latest/api-v2/api/v2/listener/listener.proto.html#envoy-api-msg-listener-filterchain
     filter_chains:
@@ -20,7 +20,6 @@ static_resources:
           stat_prefix: ingress_redis
           cluster: local_service
 
-
   # https://www.envoyproxy.io/docs/envoy/latest/api-v2/clusters/clusters
   clusters:
   - name: local_service
@@ -29,7 +28,7 @@ static_resources:
     lb_policy: round_robin
     hosts:
     - socket_address:
-        address: 127.0.0.1
+        address: redis
         port_value: 6379
 
 admin:
@@ -37,4 +36,4 @@ admin:
   address:
     socket_address:
       address: 0.0.0.0
-      port_value: 8081
+      port_value: 9090
