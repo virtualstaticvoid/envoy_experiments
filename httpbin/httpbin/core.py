@@ -144,6 +144,16 @@ def view_origin():
     return jsonify(origin=request.headers.get('X-Forwarded-For', request.remote_addr))
 
 
+@app.route('/env')
+def view_environment():
+    """Returns environment variables."""
+
+    env_vars = {}
+    for k, v in os.environ.items():
+        env_vars[str(k)] = str(v)
+
+    return jsonify(env=env_vars)
+
 @app.route('/uuid')
 def view_uuid():
     """Returns a UUID."""
