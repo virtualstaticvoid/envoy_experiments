@@ -23,6 +23,7 @@ static_resources:
                   cluster: service
           http_filters:
           - name: envoy.router
+            config: {}
 
   - address:
       socket_address:

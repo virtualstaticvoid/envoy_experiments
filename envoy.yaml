@@ -85,6 +85,7 @@ static_resources:
                     prefix_rewrite: "/"
           http_filters:
           - name: envoy.router
+            config: {}
 
   clusters:
 
