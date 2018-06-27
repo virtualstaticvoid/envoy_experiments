@@ -154,7 +154,7 @@ Vagrant.configure("2") do |config|
     cp /vagrant/files/.inputrc $HOME/.inputrc
 
     # the environment
-    cp /vagrant/.env.example /vagrant/.env
+    cp --no-clobber /vagrant/.env.example /vagrant/.env
 
   SHELL
 
