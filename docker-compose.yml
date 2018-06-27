@@ -18,30 +18,15 @@ services:
       - "8000:9080"  # gateway
       - "8001:9090"  # envoy admin
     links:
-      - http_service_sc
-      - redis_service_sc
-      - postgres_service_sc
-      - rabbitmq_service_sc
+      - http_service
+      - redis_service
+      - postgres_service
+      - rabbitmq_service
 
   #
   # base services ~ not exposed via front envoy, but via sidecar proxy
   # i.e. these services are consumed by the application services
   #
-
-  redis_sc:
-    build:
-      context: sidecar
-    volumes:
-      - "./redis/envoy.yaml:/etc/envoy.yaml"
-    networks:
-      envoymesh:
-        aliases:
-          - redis_sc
-    links:
-      - redis
-    ports:
-      - "8010:9080"  # service
-      - "8011:9090"  # envoy admin
 
   redis:
     build:
@@ -51,24 +36,9 @@ services:
     networks:
       - envoymesh
     ports:
-      - "8012:6379"  # service
+      - "8010:6379"
     env_file:
       - "./.env"
-
-  postgres_sc:
-    build:
-      context: sidecar
-    volumes:
-      - "./postgres/envoy.yaml:/etc/envoy.yaml"
-    networks:
-      envoymesh:
-        aliases:
-          - postgres_sc
-    links:
-      - postgres
-    ports:
-      - "8020:9080"  # service
-      - "8021:9090"  # envoy admin
 
   postgres:
     build:
@@ -79,24 +49,9 @@ services:
     networks:
       - envoymesh
     ports:
-      - "8022:5432"  # service
+      - "8020:5432"
     env_file:
       - "./.env"
-
-  rabbitmq_sc:
-    build:
-      context: sidecar
-    volumes:
-      - "./rabbitmq/envoy.yaml:/etc/envoy.yaml"
-    networks:
-      envoymesh:
-        aliases:
-          - rabbitmq_sc
-    links:
-      - rabbitmq
-    ports:
-      - "8030:9080"  # service
-      - "8031:9090"  # envoy admin
 
   rabbitmq:
     build:
@@ -106,12 +61,10 @@ services:
     networks:
       - envoymesh
     ports:
-      - "8032:5672"   # service
-      - "8033:15672"  # rabbimq admin
+      - "8030:5672"
+      - "8031:15672"  # rabbimq admin
     env_file:
       - "./.env"
-
-
 
   #
   # example services
@@ -119,47 +72,19 @@ services:
 
   # HTTP service (backed by httpbin)
 
-  http_service_sc:
-    build:
-      context: sidecar
-    volumes:
-      - "./http_service/envoy.yaml:/etc/envoy.yaml"
-    networks:
-      envoymesh:
-        aliases:
-          - http_service_sc
-    links:
-      - http_service
-    ports:
-      - "8050:9080"  # service
-      - "8051:9090"  # envoy admin
-
   http_service:
     build:
       context: http_service
     networks:
       - envoymesh
     ports:
+      - "8050:9080"  # service via envoy
+      - "8051:9090"  # envoy admin
       - "8052:8080"  # direct connection for debugging
     env_file:
       - "./.env"
 
   # Service using redis
-
-  redis_service_sc:
-    build:
-      context: sidecar
-    volumes:
-      - "./redis_service/envoy.yaml:/etc/envoy.yaml"
-    networks:
-      envoymesh:
-        aliases:
-          - redis_service_sc
-    links:
-      - redis_service
-    ports:
-      - "8060:9080"  # service
-      - "8061:9090"  # envoy admin
 
   redis_service:
     build:
@@ -169,26 +94,13 @@ services:
     links:
       - redis_sc
     ports:
+      - "8060:9080"  # service via envoy
+      - "8061:9090"  # envoy admin
       - "8062:8080"  # direct connection for debugging
     env_file:
       - "./.env"
 
   # Service using Postgres
-
-  postgres_service_sc:
-    build:
-      context: sidecar
-    volumes:
-      - "./postgres_service/envoy.yaml:/etc/envoy.yaml"
-    networks:
-      envoymesh:
-        aliases:
-          - postgres_service_sc
-    links:
-      - postgres_service
-    ports:
-      - "8070:9080"  # service
-      - "8071:9090"  # envoy admin
 
   postgres_service:
     build:
@@ -198,26 +110,13 @@ services:
     links:
       - postgres_sc
     ports:
+      - "8070:9080"  # service via envoy
+      - "8071:9090"  # envoy admin
       - "8072:8080"  # direct connection for debugging
     env_file:
       - "./.env"
 
   # Service using rabbitmq
-
-  rabbitmq_service_sc:
-    build:
-      context: sidecar
-    volumes:
-      - "./rabbitmq_service/envoy.yaml:/etc/envoy.yaml"
-    networks:
-      envoymesh:
-        aliases:
-          - rabbitmq_service_sc
-    links:
-      - rabbitmq_service
-    ports:
-      - "8080:9080"  # service
-      - "8081:9090"  # envoy admin
 
   rabbitmq_service:
     build:
@@ -227,6 +126,8 @@ services:
     links:
       - rabbitmq_sc
     ports:
+      - "8080:9080"  # service via envoy
+      - "8081:9090"  # envoy admin
       - "8082:8080"  # direct connection for debugging
     env_file:
       - "./.env"

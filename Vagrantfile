@@ -40,18 +40,9 @@ Vagrant.configure("2") do |config|
   # base services
 
   config.vm.network "forwarded_port", guest: 8010, host: 8010 # redis
-  config.vm.network "forwarded_port", guest: 8011, host: 8011 # redis envoy admin
-  config.vm.network "forwarded_port", guest: 8012, host: 8012 # redis direct
-
   config.vm.network "forwarded_port", guest: 8020, host: 8020 # postgres
-  config.vm.network "forwarded_port", guest: 8021, host: 8021 # postgres envoy admin
-  config.vm.network "forwarded_port", guest: 8022, host: 8022 # postgres direct
-
   config.vm.network "forwarded_port", guest: 8030, host: 8030 # rabbitmq
-  config.vm.network "forwarded_port", guest: 8031, host: 8031 # rabbitmq envoy admin
-  config.vm.network "forwarded_port", guest: 8032, host: 8032 # rabbitmq direct
-  config.vm.network "forwarded_port", guest: 8033, host: 8033 # rabbitmq admin
-
+  config.vm.network "forwarded_port", guest: 8031, host: 8031 # rabbitmq admin
 
   # application services
 

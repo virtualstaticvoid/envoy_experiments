@@ -1,7 +1,7 @@
 module Connection
   def connection
     PG::Connection.new(
-      :host     => 'postgres_service_sc',     # connect via sidecar
+      :host     => 'localhost',     # connect via sidecar
       :port     => 5432,
       :user     => ENV['POSTGRES_USER'],
       :password => ENV['POSTGRES_PASSWORD'],

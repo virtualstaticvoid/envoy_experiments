@@ -13,14 +13,14 @@ static_resources:
           route_config:
             name: local_route
             virtual_hosts:
-            - name: service
+            - name: local_service
               domains:
               - "*"
               routes:
               - match:
                   prefix: "/"
                 route:
-                  cluster: service
+                  cluster: local_service
           http_filters:
           - name: envoy.router
             config: {}
@@ -37,13 +37,13 @@ static_resources:
           cluster: postgres
 
   clusters:
-  - name: service
+  - name: local_service
     connect_timeout: 0.25s
     type: strict_dns
     lb_policy: round_robin
     hosts:
     - socket_address:
-        address: postgres_service
+        address: localhost
         port_value: 8080
 
   - name: postgres
@@ -52,8 +52,8 @@ static_resources:
     lb_policy: round_robin
     hosts:
     - socket_address:
-        address: postgres_sc
-        port_value: 9080
+        address: postgres
+        port_value: 5432
 
 admin:
   access_log_path: "/dev/null"

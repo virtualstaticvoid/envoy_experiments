@@ -1,7 +1,7 @@
 module Connection
   def connection
     Bunny.new(
-      :host     => 'rabbitmq_service_sc',    # connect via sidecar
+      :host     => 'localhost',    # connect via sidecar
       :port     => 5672,
       :vhost    => ENV['RABBITMQ_DEFAULT_VHOST'],
       :user     => ENV['RABBITMQ_DEFAULT_USER'],
