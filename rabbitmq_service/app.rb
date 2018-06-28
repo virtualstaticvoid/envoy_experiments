@@ -1,41 +1,34 @@
 require "sinatra"
-require "sinatra/streaming"
+# require "sinatra/streaming"
 require "time"
 require "bunny"
 require_relative "connection"
 
 include Connection
 
-get '/' do
-  "Use /publish or /subscribe"
+use Rack::Logger
+
+helpers do
+  def logger
+    request.logger
+  end
 end
 
-get '/publish' do
+get '/' do
+  "Use POST /publish"
+end
 
-  id = with_connection do |connection|
+post '/publish' do
+
+  data = params
+
+  with_connection do |connection|
     channel = connection.create_channel
     queue = channel.queue("test", :auto_delete => false, :durable => true, :exclusive => false)
-    queue.publish("Hello World @ #{Time.now.utc}")
+    queue.publish("Hello World @ #{Time.now.utc} - #{data}")
   end
 
   content_type :json
-  return { :id => id }.to_json
-end
+  return { :result => :success }.to_json
 
-get '/subscribe' do
-
-  content_type :json
-
-  stream do |out|
-    with_connection do |connection|
-      channel = connection.create_channel
-      queue = channel.queue("test", :auto_delete => false, :durable => true, :exclusive => false)
-
-      queue.subscribe(:block => true, :exclusive => false, :manual_ack => true) do |delivery_info, metadata, payload|
-        out.puts({:message => payload}.to_json)
-        channel.acknowledge(delivery_info.delivery_tag, false)
-        out.flush
-      end
-    end
-  end
 end
