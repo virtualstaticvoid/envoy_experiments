@@ -1,26 +1,41 @@
+# this is the service configuration
 static_resources:
+
+  # https://www.envoyproxy.io/docs/envoy/latest/api-v2/api/v2/lds.proto.html#envoy-api-msg-listener
   listeners:
+
   - address:
       socket_address:
         address: 0.0.0.0
         port_value: 9080
+
+    # https://www.envoyproxy.io/docs/envoy/latest/api-v2/api/v2/listener/listener.proto.html#envoy-api-msg-listener-filterchain
     filter_chains:
+
+    # https://www.envoyproxy.io/docs/envoy/latest/api-v2/api/v2/listener/listener.proto.html#envoy-api-msg-listener-filter
     - filters:
+
+      # https://www.envoyproxy.io/docs/envoy/latest/api-v2/config/filter/network/http_connection_manager/v2/http_connection_manager.proto
       - name: envoy.http_connection_manager
         config:
           codec_type: auto
           stat_prefix: ingress_http
+
+          # https://www.envoyproxy.io/docs/envoy/latest/api-v2/api/v2/rds.proto#envoy-api-msg-routeconfiguration
           route_config:
             name: local_route
+
+            # https://www.envoyproxy.io/docs/envoy/latest/api-v2/api/v2/route/route.proto#envoy-api-msg-route-virtualhost
             virtual_hosts:
-            - name: local_service
-              domains:
-              - "*"
+            - name: local_vhost
+              domains: ["*"]
               routes:
               - match:
                   prefix: "/"
                 route:
                   cluster: local_service
+
+          # https://www.envoyproxy.io/docs/envoy/latest/api-v2/config/filter/network/http_connection_manager/v2/http_connection_manager.proto#envoy-api-msg-config-filter-network-http-connection-manager-v2-httpfilter
           http_filters:
           - name: envoy.router
             config: {}
@@ -37,13 +52,15 @@ static_resources:
           cluster: postgres
 
   clusters:
+
+  # https://www.envoyproxy.io/docs/envoy/latest/api-v2/api/v2/cds.proto#envoy-api-msg-cluster
   - name: local_service
     connect_timeout: 0.25s
     type: strict_dns
     lb_policy: round_robin
     hosts:
     - socket_address:
-        address: localhost
+        address: 127.0.0.1
         port_value: 8080
 
   - name: postgres

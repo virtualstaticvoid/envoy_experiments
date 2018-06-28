@@ -81,6 +81,8 @@ services:
       - "8050:9080"  # service via envoy
       - "8051:9090"  # envoy admin
       - "8052:8080"  # direct connection for debugging
+    volumes:
+      - "./http_service:/usr/service" # for debugging (reduce need to rebuild image)
     env_file:
       - "./.env"
 
@@ -91,12 +93,12 @@ services:
       context: redis_service
     networks:
       - envoymesh
-    links:
-      - redis_sc
     ports:
       - "8060:9080"  # service via envoy
       - "8061:9090"  # envoy admin
       - "8062:8080"  # direct connection for debugging
+    volumes:
+      - "./redis_service:/usr/service" # for debugging (reduce need to rebuild image)
     env_file:
       - "./.env"
 
@@ -107,12 +109,12 @@ services:
       context: postgres_service
     networks:
       - envoymesh
-    links:
-      - postgres_sc
     ports:
       - "8070:9080"  # service via envoy
       - "8071:9090"  # envoy admin
       - "8072:8080"  # direct connection for debugging
+    volumes:
+      - "./postgres_service:/usr/service" # for debugging (reduce need to rebuild image)
     env_file:
       - "./.env"
 
@@ -123,12 +125,12 @@ services:
       context: rabbitmq_service
     networks:
       - envoymesh
-    links:
-      - rabbitmq_sc
     ports:
       - "8080:9080"  # service via envoy
       - "8081:9090"  # envoy admin
       - "8082:8080"  # direct connection for debugging
+    volumes:
+      - "./rabbitmq_service:/usr/service" # for debugging (reduce need to rebuild image)
     env_file:
       - "./.env"
 

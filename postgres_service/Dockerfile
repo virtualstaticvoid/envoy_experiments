@@ -4,12 +4,17 @@ FROM envoyproxy/envoy:latest AS envoy
 
 FROM ruby:2.5-stretch
 
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      supervisor \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /var/log/supervisor
+
 # copy the pre-built envoy binary
 COPY --from=envoy /usr/local/bin/envoy /usr/local/bin/envoy
-COPY envoy.yaml /etc/envoy.yaml
 
 RUN gem install bundler -v 1.16.2
-
 RUN bundle config --global frozen 1
 
 RUN mkdir -p /usr/service
@@ -20,8 +25,6 @@ RUN bundle install -j 4
 
 COPY . .
 
-EXPOSE 8080
+EXPOSE 8080 9080 9090
 
-ADD ./start_service.sh /usr/local/bin/start_service.sh
-RUN chmod u+x /usr/local/bin/start_service.sh
-ENTRYPOINT /usr/local/bin/start_service.sh
+CMD ["supervisord", "--nodaemon", "--configuration", "supervisord.conf"]

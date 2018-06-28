@@ -15,7 +15,7 @@ static_resources:
           route_config:
             name: local_route
             virtual_hosts:
-            - name: service
+            - name: local_vhost
               domains: ["*"]
               routes:
 
@@ -95,7 +95,7 @@ static_resources:
     lb_policy: ROUND_ROBIN
     hosts:
     - socket_address:
-        address: http_service_sc
+        address: http_service
         port_value: 9080
 
   - name: redis_service
@@ -104,7 +104,7 @@ static_resources:
     lb_policy: ROUND_ROBIN
     hosts:
     - socket_address:
-        address: redis_service_sc
+        address: redis_service
         port_value: 9080
 
   - name: postgres_service
@@ -113,7 +113,7 @@ static_resources:
     lb_policy: ROUND_ROBIN
     hosts:
     - socket_address:
-        address: postgres_service_sc
+        address: postgres_service
         port_value: 9080
 
   - name: rabbitmq_service
@@ -122,7 +122,7 @@ static_resources:
     lb_policy: ROUND_ROBIN
     hosts:
     - socket_address:
-        address: rabbitmq_service_sc
+        address: rabbitmq_service
         port_value: 9080
 
 admin:
