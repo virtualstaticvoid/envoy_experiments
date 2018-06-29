@@ -101,6 +101,8 @@ services:
       - "./redis_service:/usr/service" # for debugging (reduce need to rebuild image)
     env_file:
       - "./.env"
+    depends_on:
+      - redis
 
   # Service using Postgres
 
@@ -117,6 +119,8 @@ services:
       - "./postgres_service:/usr/service" # for debugging (reduce need to rebuild image)
     env_file:
       - "./.env"
+    depends_on:
+      - postgres
 
   # Service using rabbitmq
 
@@ -134,6 +138,8 @@ services:
       - "./rabbitmq_service:/usr/service" # for debugging (reduce need to rebuild image)
     env_file:
       - "./.env"
+    depends_on:
+      - rabbitmq
 
   rabbitmq_worker:
     build:
@@ -147,6 +153,8 @@ services:
       - "./rabbitmq_service:/usr/service" # for debugging (reduce need to rebuild image)
     env_file:
       - "./.env"
+    depends_on:
+      - rabbitmq
 
 networks:
   envoymesh: {}
