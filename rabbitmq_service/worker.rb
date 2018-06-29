@@ -9,8 +9,10 @@ require_relative "connection"
 
 include Connection
 
+STDOUT.sync = true
 logger = Logger.new(STDOUT)
-logger.level = Logger::WARN
+logger.level = Logger::DEBUG
+
 logger.info "Worker starting up..."
 
 with_connection do |connection|
