@@ -43,6 +43,8 @@ Vagrant.configure("2") do |config|
   config.vm.network "forwarded_port", guest: 8020, host: 8020 # postgres
   config.vm.network "forwarded_port", guest: 8030, host: 8030 # rabbitmq
   config.vm.network "forwarded_port", guest: 8031, host: 8031 # rabbitmq admin
+  config.vm.network "forwarded_port", guest: 8040, host: 8040 # prometheus
+  config.vm.network "forwarded_port", guest: 8041, host: 8041 # grafana
 
   # application services
 

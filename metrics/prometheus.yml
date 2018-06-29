@@ -1,0 +1,86 @@
+# https://prometheus.io/docs/prometheus/latest/configuration/configuration
+
+global:
+  scrape_interval: 15s
+  scrape_timeout: 10s
+  evaluation_interval: 15s
+
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets: []
+    scheme: http
+    timeout: 10s
+
+scrape_configs:
+
+- job_name: prometheus
+  metrics_path: /metrics
+  scheme: http
+  static_configs:
+  - targets:
+    - localhost:9090
+
+# gateway
+- job_name: gateway
+  metrics_path: /stats/prometheus
+  scheme: http
+  static_configs:
+  - targets:
+    - 'gateway:9090'
+    labels:
+      service: gateway
+      # depends_on: [http_service, redis_service, postgres_service, rabbitmq_service]
+
+# http_service
+- job_name: http_service
+  metrics_path: /stats/prometheus
+  scheme: http
+  static_configs:
+  - targets:
+    - 'http_service:9090'
+    labels:
+      service: http_service
+
+# redis_service
+- job_name: redis_service
+  metrics_path: /stats/prometheus
+  scheme: http
+  static_configs:
+  - targets:
+    - 'redis_service:9090'
+    labels:
+      service: redis_service
+      depends_on: redis
+
+# postgres_service
+- job_name: postgres_service
+  metrics_path: /stats/prometheus
+  scheme: http
+  static_configs:
+  - targets:
+    - 'postgres_service:9090'
+    labels:
+      service: postgres_service
+      depends_on: postgres
+
+# rabbitmq_service
+- job_name: rabbitmq_service
+  metrics_path: /stats/prometheus
+  scheme: http
+  static_configs:
+  - targets:
+    - 'rabbitmq_service:9090'
+    labels:
+      service: rabbitmq_service
+      depends_on: rabbitmq
+
+# rabbitmq_worker
+- job_name: rabbitmq_worker
+  metrics_path: /stats/prometheus
+  scheme: http
+  static_configs:
+  - targets:
+    - 'rabbitmq_worker:9090'
+    labels:
+      service: rabbitmq_worker

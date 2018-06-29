@@ -66,6 +66,35 @@ services:
     env_file:
       - "./.env"
 
+  prometheus:
+    build:
+      context: metrics
+    volumes:
+      - "prometheus_data:/prometheus"
+      - "./metrics/prometheus.yml:/etc/prometheus/prometheus.yml"
+    networks:
+      - envoymesh
+    ports:
+      - "8040:9090"
+    env_file:
+      - "./.env"
+
+  grafana:
+    image: grafana/grafana:5.2.1
+    volumes:
+      - "grafana_data:/var/lib/grafana"
+      - "./metrics/config.ini:/etc/grafana/config.ini"
+      - "./metrics/provisioning:/etc/grafana/provisioning"
+      - "./metrics/dashboards:/var/lib/grafana/dashboards"
+    networks:
+      - envoymesh
+    ports:
+      - "8041:3000"
+    links:
+      - prometheus
+    env_file:
+      - "./.env"
+
   #
   # example services
   #
@@ -163,3 +192,5 @@ volumes:
   redis_data: {}
   postgres_data: {}
   rabbitmq_data: {}
+  prometheus_data: {}
+  grafana_data: {}
