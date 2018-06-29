@@ -123,12 +123,26 @@ services:
   rabbitmq_service:
     build:
       context: rabbitmq_service
+      dockerfile: Dockerfile.server
     networks:
       - envoymesh
     ports:
       - "8080:9080"  # service via envoy
       - "8081:9090"  # envoy admin
       - "8082:8080"  # direct connection for debugging
+    volumes:
+      - "./rabbitmq_service:/usr/service" # for debugging (reduce need to rebuild image)
+    env_file:
+      - "./.env"
+
+  rabbitmq_worker:
+    build:
+      context: rabbitmq_service
+      dockerfile: Dockerfile.worker
+    networks:
+      - envoymesh
+    ports:
+      - "8091:9090"  # envoy admin
     volumes:
       - "./rabbitmq_service:/usr/service" # for debugging (reduce need to rebuild image)
     env_file:

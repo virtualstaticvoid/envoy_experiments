@@ -61,6 +61,7 @@ Vagrant.configure("2") do |config|
   config.vm.network "forwarded_port", guest: 8080, host: 8080 # rabbitmq service
   config.vm.network "forwarded_port", guest: 8081, host: 8081 # rabbitmq envoy admin
   config.vm.network "forwarded_port", guest: 8082, host: 8082 # rabbitmq service direct
+  config.vm.network "forwarded_port", guest: 8091, host: 8091 # rabbitmq worker envoy admin
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine and only allow access
