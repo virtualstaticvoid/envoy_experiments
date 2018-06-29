@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# curl localhost:8000/foo/bar/baz
+wrk -t12 -c200 -d30s http://localhost:8000/foo/bar/baz
+
+# curl localhost:8000/foo/bar
+wrk -t12 -c200 -d30s http://localhost:8000/foo/bar
+
+# curl localhost:8000/foo
+wrk -t12 -c200 -d30s http://localhost:8000/foo
+
+# curl -d "foo=bar" localhost:8000/rabbitmq/publish
+wrk -t12 -c200 -d30s -s files/post.lua http://localhost:8080/publish
+
+# curl localhost:8000/postgres
+wrk -t12 -c200 -d30s http://localhost:8000/postgres
+
+# curl localhost:8000/redis
+wrk -t12 -c200 -d30s http://localhost:8000/redis
