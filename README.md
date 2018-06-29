@@ -43,3 +43,20 @@ http://localhost:8061/stats
 
 http://localhost:8070/
 http://localhost:8071/stats
+
+
+http://docs.grafana.org/installation/configuration/#provisioning
+https://ops.tips/blog/initialize-grafana-with-preconfigured-dashboards/#example
+http://docs.grafana.org/installation/docker/
+http://www.projectatomic.io/docs/docker-image-author-guidance/
+https://medium.com/@mccode/processes-in-containers-should-not-run-as-root-2feae3f0df3b
+https://blog.turbinelabs.io/the-easiest-way-to-roll-out-envoy-390961a0ddd4
+
+
+https://www.learnenvoy.io/articles/incremental-deploys.html
+https://blog.envoyproxy.io/envoy-stats-b65c7f363342
+https://blog.envoyproxy.io/lyfts-envoy-dashboards-5c91738816b1
+https://blog.turbinelabs.io/a-basic-service-mesh-with-envoy-71d16bb7347d
+https://blog.turbinelabs.io/connect-your-service-discovery-to-envoy-6fbcd1dd0d2a
+https://www.envoyproxy.io/docs/envoy/latest/api-v2/config/filter/http/router/v2/router.proto#envoy-api-msg-config-filter-http-router-v2-router
+https://github.com/envoyproxy/envoy
