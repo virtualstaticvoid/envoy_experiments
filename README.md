@@ -23,9 +23,28 @@ _TO BE COMPLETED_
 
 * [Documentation](https://www.envoyproxy.io/docs/envoy/v1.5.0/)
 
+```
+curl localhost:8000/
+curl localhost:8000/foo
+curl localhost:8000/foo/bar
+curl localhost:8000/foo/bar/baz
+curl localhost:8000/postgres
+curl -d "" localhost:8000/rabbitmq/publish
+curl localhost:8000/redis
+```
+
+```
+curl localhost:8051/stats/prometheus -o http_service.txt
+curl localhost:8061/stats/prometheus -o redis_service.txt
+curl localhost:8071/stats/prometheus -o postgres_service.txt
+curl localhost:8081/stats/prometheus -o rabbitmq_service.txt
+curl localhost:8091/stats/prometheus -o rabbitmq_worker.txt
+```
+
 
 http://localhost:8000/
 http://localhost:8000/foo
+
 http://localhost:8001/stats
 
 http://localhost:8011/stats
