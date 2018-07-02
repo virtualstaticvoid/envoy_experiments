@@ -20,6 +20,8 @@ scrape_configs:
   static_configs:
   - targets:
     - localhost:9090
+    labels:
+      service: metrics
 
 # gateway
 - job_name: gateway
