@@ -34,6 +34,7 @@ curl localhost:8000/redis
 ```
 
 ```
+curl localhost:8001/stats/prometheus -o gateway.txt
 curl localhost:8051/stats/prometheus -o http_service.txt
 curl localhost:8061/stats/prometheus -o redis_service.txt
 curl localhost:8071/stats/prometheus -o postgres_service.txt

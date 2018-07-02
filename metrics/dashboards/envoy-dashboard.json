@@ -3,7 +3,7 @@
     "list": [
       {
         "builtIn": 1,
-        "datasource": "envoy",
+        "datasource": "-- Grafana --",
         "enable": true,
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
@@ -12,10 +12,10 @@
       }
     ]
   },
-  "uid": "8afdc608",
+  "description": "Envoy Proxy Monitoring",
   "editable": true,
-  "gnetId": 6693,
-  "graphTooltip": 0,
+  "gnetId": null,
+  "graphTooltip": 1,
   "id": null,
   "links": [],
   "panels": [
@@ -1176,6 +1176,6 @@
     ]
   },
   "title": "Envoy Proxy",
-  "version": 1,
-  "description": "Envoy proxy monitoring Dashboard with cluster and host level templates."
+  "uid": "8afdc608",
+  "version": 1
 }
