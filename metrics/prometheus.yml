@@ -23,6 +23,15 @@ scrape_configs:
     labels:
       service: metrics
 
+- job_name: grafana
+  metrics_path: /metrics
+  scheme: http
+  static_configs:
+  - targets:
+    - grafana:3000
+    labels:
+      service: metrics
+
 # gateway
 - job_name: gateway
   metrics_path: /stats/prometheus
