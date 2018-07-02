@@ -83,14 +83,15 @@ services:
     image: grafana/grafana:5.2.1
     volumes:
       - "grafana_data:/var/lib/grafana"
-      - "./metrics/config.ini:/etc/grafana/config.ini"
-      - "./metrics/provisioning:/etc/grafana/provisioning"
-      - "./metrics/dashboards:/var/lib/grafana/dashboards"
+      - "./metrics/provisioning:/etc/grafana/provisioning"  # GF_PATHS_PROVISIONING
+      - "./metrics/dashboards:/etc/grafana/dashboards"
     networks:
       - envoymesh
     ports:
       - "8041:3000"
     links:
+      - prometheus
+    depends_on:
       - prometheus
     env_file:
       - "./.env"
